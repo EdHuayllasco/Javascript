@@ -1,5 +1,6 @@
 const carrito = document.querySelector('#carrito');
 const contenedorCarrito = document.querySelector('#lista-carrito tbody');
+const totalCarrito = document.querySelector('#total p');
 const listacursos = document.querySelector('#lista-cursos');
 const vaciarCarritoBtn = document.querySelector('#vaciar-carrito');
 let articuloscarrito = [];
@@ -29,22 +30,22 @@ function agregarCurso(e){
 }
 //Eliminar curso del carrito 
 function eliminarCurso (e){
-    console.log(e.target);
+    let aux = 0;
     if(e.target.classList.contains('borrar-curso')){
         const cursoID = e.target.getAttribute('data-id');
         // eliminar del arreglo por el data-id
-        const existe = articuloscarrito.some(curso => curso.id === cursoID && curso.cantidad > 1);
-        if(existe) {
-            articuloscarrito.forEach(curso => {
-                if(curso.id === cursoID && curso.cantidad > 1) {
-                    // console.log(curso.cantidad);
-                    curso.cantidad--;
-                }
-            })
-        }else {
+        articuloscarrito.forEach(curso => {
+            if(curso.id === cursoID && curso.cantidad > 1){
+                curso.cantidad --;
+                aux = 1;
+                return;
+            }
+        })
+        if(aux == 0 ) {
             articuloscarrito = articuloscarrito.filter ( curso => curso.id !== cursoID );
-        }        
-        carritoHTML();
+        }
+        let total = totalCarro();        
+        carritoHTML(total);
     }
 }
 // Lee el cotenido del html al que le dimos click y extrae la informacion del curso
@@ -76,12 +77,11 @@ function LeerdatosCurso(curso){
         // agrega el objeto al carrito
         articuloscarrito = [...articuloscarrito, infoCurso];
     }
-    
-    carritoHTML();
-    console.log(articuloscarrito);
+    let total = totalCarro();
+    carritoHTML(total);
 }
 // muestra el carrito de compras en el html
-function carritoHTML () {
+function carritoHTML (e) {
     //limpiar html 
     limpiarHTML();
     //recorre el carrito y genera el html
@@ -99,7 +99,12 @@ function carritoHTML () {
         `;
         // agrega el html del carrito en el tbody
         contenedorCarrito.appendChild(row);
-    })
+    });
+    const row1 = document.createElement('p');
+    row1.innerHTML = `
+        <p> El precio total es: ${e} </p>
+    `;
+    totalCarrito.appendChild(row1);
 }
 
 //eliminar los cursos del table body
@@ -109,4 +114,20 @@ function limpiarHTML(){
     while (contenedorCarrito.firstChild){
         contenedorCarrito.removeChild(contenedorCarrito.firstChild);
     }
+    while (totalCarrito.firstChild){
+        totalCarrito.removeChild(totalCarrito.firstChild);
+    }
+    
+}
+function totalCarro(){
+    let total = 0;
+    articuloscarrito.forEach((curso)=>{
+        let cantidad = curso.cantidad;
+        let precio = curso.precio;
+        precio = precio.substring(1);
+        //console.log(precio);
+        precio = parseInt(precio);
+        total = total + (cantidad*precio);
+    });
+    return total;
 }
